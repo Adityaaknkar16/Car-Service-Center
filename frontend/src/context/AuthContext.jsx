@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
       }
     };
     fetchUser();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []); // eslint-disable-line
 
   const login = async (email, password) => {
     const { data } = await axios.post('/api/auth/login', { email, password });

@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Manrope:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-luxury-bg-deep text-luxury-text-primary font-sans antialiased selection:bg-luxury-gold-dark selection:text-luxury-bg-deep;
+    margin: 0;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif tracking-wide;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .glass-panel-hover {
+    @apply transition-all duration-300 ease-out hover:bg-[rgba(255,255,255,0.07)] hover:border-[rgba(255,255,255,0.15)] hover:-translate-y-1 hover:shadow-xl hover:shadow-[rgba(212,196,160,0.05)];
+  }
+
+  .gold-gradient-bg {
+    @apply bg-gradient-to-r from-luxury-gold-light to-luxury-gold-dark text-luxury-bg-deep;
+  }
+}
+
+/* Custom Scrollbar for Luxury Look */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0d0e10;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #16181c;
+  border: 2px solid #0d0e10;
+  border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #d4c4a0;
+}
