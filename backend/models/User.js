@@ -7,7 +7,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Name is required'],
       trim: true,
-      maxlength: [60, 'Name cannot exceed 60 characters'],
     },
     email: {
       type: String,
@@ -20,36 +19,32 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: [true, 'Password is required'],
-      minlength: [6, 'Password must be at least 6 characters'],
-      select: false, // never returned in queries by default
+      select: false, // Ensure password isn't returned by default in queries
     },
     phone: {
       type: String,
       trim: true,
-      match: [/^\+?[\d\s\-()]{7,15}$/, 'Please provide a valid phone number'],
     },
     role: {
       type: String,
-      enum: ['customer', 'admin'],
+      enum: ['admin', 'customer'],
       default: 'customer',
     },
   },
-  {
-    timestamps: true, // createdAt, updatedAt
-  }
+  { timestamps: true }
 );
 
-// ─── Hash password before saving ─────────────────────────────────────────────
+// Hash password before saving
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
-  const salt = await bcrypt.genSalt(12);
-  this.password = await bcrypt.hash(this.password, salt);
+  this.password = await bcrypt.hash(this.password, 10);
   next();
 });
 
-// ─── Instance method: compare passwords ──────────────────────────────────────
-userSchema.methods.comparePassword = async function (candidatePassword) {
-  return bcrypt.compare(candidatePassword, this.password);
+// Compare password method
+userSchema.methods.comparePassword = async function (enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
 };
 
 module.exports = mongoose.model('User', userSchema);
+

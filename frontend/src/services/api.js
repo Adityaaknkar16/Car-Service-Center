@@ -28,8 +28,16 @@ export const deleteService = (id) => api.delete(`/services/${id}`);
 // ─── Bookings ─────────────────────────────────────────────────────────────────
 export const fetchBookings = () => api.get('/bookings');
 export const fetchBookingById = (id) => api.get(`/bookings/${id}`);
-export const createBooking = (data) => api.post('/bookings', data);
-export const updateBookingStatus = (id, status) => api.put(`/bookings/${id}/status`, { status });
+export const createBooking = (data) => {
+  const headers = data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : {};
+  return api.post('/bookings', data, { headers });
+};
+export const updateBookingStatus = (id, status, repairNotes) => api.put(`/bookings/${id}/status`, { status, repairNotes });
 export const cancelBooking = (id) => api.put(`/bookings/${id}/cancel`);
+export const uploadRepairProgressImages = (id, formData) => api.post(`/bookings/${id}/repair-progress`, formData, {
+  headers: { 'Content-Type': 'multipart/form-data' }
+});
+export const fetchBookingImages = (id) => api.get(`/bookings/${id}/images`);
+export const fetchRepairProgressImages = (id) => api.get(`/bookings/${id}/repair-progress`);
 
 export default api;

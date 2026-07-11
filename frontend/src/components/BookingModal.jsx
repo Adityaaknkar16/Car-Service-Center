@@ -21,6 +21,8 @@ const initialState = {
   error: '',
   loading: false,
   success: false,
+  images: [],
+  imagePreviews: [],
 };
 
 function bookingReducer(state, action) {
@@ -33,6 +35,21 @@ function bookingReducer(state, action) {
       return { ...state, vehicle: { ...state.vehicle, ...action.payload } };
     case 'SET_APPOINTMENT':
       return { ...state, ...action.payload };
+    case 'ADD_IMAGES':
+      return { 
+        ...state, 
+        images: [...state.images, ...action.payload.files], 
+        imagePreviews: [...state.imagePreviews, ...action.payload.previews], 
+        error: '' 
+      };
+    case 'REMOVE_IMAGE':
+      const updatedImages = state.images.filter((_, idx) => idx !== action.payload);
+      const updatedPreviews = state.imagePreviews.filter((_, idx) => idx !== action.payload);
+      return { 
+        ...state, 
+        images: updatedImages, 
+        imagePreviews: updatedPreviews 
+      };
     case 'START_SUBMIT':
       return { ...state, loading: true, error: '' };
     case 'SUBMIT_SUCCESS':
@@ -40,6 +57,7 @@ function bookingReducer(state, action) {
     case 'SUBMIT_FAILURE':
       return { ...state, loading: false, error: action.payload };
     case 'RESET':
+      state.imagePreviews.forEach((url) => URL.revokeObjectURL(url));
       return initialState;
     default:
       return state;
@@ -87,6 +105,7 @@ const BookingModal = ({ isOpen, onClose, preselectedServiceId }) => {
     'Select Service',
     'Vehicle Specs',
     'Schedule',
+    'Car Images',
     'Confirm',
   ];
 
@@ -112,6 +131,12 @@ const BookingModal = ({ isOpen, onClose, preselectedServiceId }) => {
         return;
       }
     }
+    if (state.step === 4) {
+      if (state.images.length === 0) {
+        dispatch({ type: 'SUBMIT_FAILURE', payload: 'At least 1 image must be uploaded to proceed' });
+        return;
+      }
+    }
     dispatch({ type: 'SET_STEP', payload: state.step + 1 });
   };
 
@@ -122,13 +147,19 @@ const BookingModal = ({ isOpen, onClose, preselectedServiceId }) => {
   const handleSubmit = async () => {
     dispatch({ type: 'START_SUBMIT' });
     try {
-      await createBooking({
-        serviceId: state.serviceId,
-        vehicle: state.vehicle,
-        appointmentDate: state.appointmentDate,
-        appointmentTime: state.appointmentTime,
-        notes: state.notes,
+      const formData = new FormData();
+      formData.append('serviceId', state.serviceId);
+      formData.append('vehicle', JSON.stringify(state.vehicle));
+      formData.append('appointmentDate', state.appointmentDate);
+      formData.append('appointmentTime', state.appointmentTime);
+      formData.append('notes', state.notes);
+      
+      state.images.forEach((img) => {
+        formData.append('images', img);
       });
+
+      await createBooking(formData);
+      state.imagePreviews.forEach((url) => URL.revokeObjectURL(url));
       dispatch({ type: 'SUBMIT_SUCCESS' });
     } catch (err) {
       dispatch({
@@ -343,8 +374,87 @@ const BookingModal = ({ isOpen, onClose, preselectedServiceId }) => {
                     </div>
                   )}
 
-                  {/* Step 4: Confirm */}
+                  {/* Step 4: Car Images */}
                   {state.step === 4 && (
+                    <div className="space-y-4">
+                      <div>
+                        <h3 className="text-lg font-serif text-luxury-gold-light">Upload Car Images</h3>
+                        <p className="text-[11px] text-luxury-text-secondary mt-1">
+                          Upload 2-4 photos showing the car condition/problem area (min 1, max 4, max 5MB each).
+                        </p>
+                      </div>
+
+                      <div className="flex flex-col items-center justify-center border-2 border-dashed border-white/10 hover:border-luxury-gold-light/50 transition-all rounded-2xl p-6 bg-white/5 relative cursor-pointer group">
+                        <input
+                          type="file"
+                          multiple
+                          accept=".jpg,.jpeg,.png,.webp"
+                          className="absolute inset-0 opacity-0 cursor-pointer"
+                          onChange={(e) => {
+                            const files = Array.from(e.target.files || []);
+                            if (state.images.length + files.length > 4) {
+                              dispatch({ type: 'SUBMIT_FAILURE', payload: 'You can upload a maximum of 4 images' });
+                              return;
+                            }
+                            
+                            const validFiles = [];
+                            const previews = [];
+                            let hasError = false;
+                            
+                            for (let file of files) {
+                              const isValidType = ['image/jpeg', 'image/png', 'image/webp'].includes(file.type);
+                              const isValidSize = file.size <= 5 * 1024 * 1024;
+                              
+                              if (!isValidType) {
+                                dispatch({ type: 'SUBMIT_FAILURE', payload: 'Invalid file type. Only JPG, PNG, and WEBP are allowed.' });
+                                hasError = true;
+                                break;
+                              }
+                              
+                              if (!isValidSize) {
+                                dispatch({ type: 'SUBMIT_FAILURE', payload: 'File size exceeds 5MB limit.' });
+                                hasError = true;
+                                break;
+                              }
+                              
+                              validFiles.push(file);
+                              previews.push(URL.createObjectURL(file));
+                            }
+                            
+                            if (!hasError && validFiles.length > 0) {
+                              dispatch({ type: 'ADD_IMAGES', payload: { files: validFiles, previews } });
+                            }
+                          }}
+                        />
+                        <span className="text-2xl mb-2 text-luxury-gold-light/70 group-hover:scale-110 transition-transform">📤</span>
+                        <span className="text-xs font-semibold text-luxury-text-primary">Click or drag files to upload</span>
+                        <span className="text-[10px] text-luxury-text-secondary mt-1">JPG, PNG, WEBP up to 5MB</span>
+                      </div>
+
+                      {state.imagePreviews.length > 0 && (
+                        <div className="grid grid-cols-4 gap-4 mt-4">
+                          {state.imagePreviews.map((preview, idx) => (
+                            <div key={idx} className="relative group aspect-square rounded-xl overflow-hidden border border-white/10">
+                              <img src={preview} alt="Preview" className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  URL.revokeObjectURL(preview);
+                                  dispatch({ type: 'REMOVE_IMAGE', payload: idx });
+                                }}
+                                className="absolute top-1 right-1 bg-red-900/80 hover:bg-red-800 text-white rounded-full p-1 text-[10px] font-bold w-5 h-5 flex items-center justify-center transition-colors"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Step 5: Confirm */}
+                  {state.step === 5 && (
                     <div className="space-y-4">
                       <h3 className="text-lg font-serif text-luxury-gold-light">Review Details</h3>
                       <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
@@ -372,6 +482,14 @@ const BookingModal = ({ isOpen, onClose, preselectedServiceId }) => {
                             {state.appointmentDate} at {state.appointmentTime.split(' ')[0]}
                           </span>
                         </div>
+                        <div className="col-span-2">
+                          <span className="text-[10px] uppercase tracking-widest text-luxury-text-secondary block mb-1">Car Images Uploaded</span>
+                          <div className="flex gap-2">
+                            {state.imagePreviews.map((preview, idx) => (
+                              <img key={idx} src={preview} alt="Uploaded car" className="w-12 h-12 object-cover rounded-lg border border-white/10" />
+                            ))}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -388,7 +506,7 @@ const BookingModal = ({ isOpen, onClose, preselectedServiceId }) => {
                   {state.step === 1 ? 'Cancel' : 'Back'}
                 </Button>
 
-                {state.step < 4 ? (
+                {state.step < 5 ? (
                   <Button variant="solid" onClick={handleNext} size="sm">
                     Next Step
                   </Button>

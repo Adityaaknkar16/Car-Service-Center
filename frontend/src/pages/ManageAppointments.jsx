@@ -3,6 +3,7 @@ import { fetchBookings, updateBookingStatus } from '../services/api';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import StatusTracker from '../components/StatusTracker';
+import AdminBookingDetail from '../components/AdminBookingDetail';
 
 const ManageAppointments = () => {
   const [bookings, setBookings] = useState([]);
@@ -165,74 +166,13 @@ const ManageAppointments = () => {
         </div>
       )}
 
-      {/* Inspection Modal */}
+      {/* Booking Details View Panel */}
       {selectedBooking && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-luxury-bg-deep/80 backdrop-blur-sm">
-          <Card hoverable={false} className="w-full max-w-lg space-y-6">
-            <div className="flex justify-between items-start border-b border-white/5 pb-3">
-              <div>
-                <span className="text-[9px] uppercase tracking-widest text-luxury-gold-light block">Inspection</span>
-                <h3 className="text-sm font-semibold uppercase text-luxury-text-primary">
-                  Booking #{selectedBooking._id.slice(-6)}
-                </h3>
-              </div>
-              <button
-                onClick={() => setSelectedBooking(null)}
-                className="text-luxury-text-secondary hover:text-luxury-text-primary text-sm"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Stepper Status */}
-            <div className="py-2">
-              <span className="text-[9px] uppercase tracking-widest text-luxury-text-secondary block mb-4 text-center">
-                Current Servicing Status
-              </span>
-              <StatusTracker currentStatus={selectedBooking.status} />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 text-xs">
-              <div>
-                <span className="text-[9px] uppercase tracking-widest text-luxury-text-secondary block">Owner Details</span>
-                <span className="text-luxury-text-primary block font-medium">{selectedBooking.customer?.name}</span>
-                <span className="text-luxury-text-secondary/70 block text-[10px]">{selectedBooking.customer?.email}</span>
-                <span className="text-luxury-text-secondary/70 block text-[10px]">{selectedBooking.customer?.phone}</span>
-              </div>
-              <div>
-                <span className="text-[9px] uppercase tracking-widest text-luxury-text-secondary block">Vehicle Specifications</span>
-                <span className="text-luxury-text-primary block uppercase font-medium">
-                  {selectedBooking.vehicle?.year} {selectedBooking.vehicle?.make} {selectedBooking.vehicle?.model}
-                </span>
-                <span className="text-luxury-text-secondary/70 block text-[10px] uppercase">
-                  License: {selectedBooking.vehicle?.licensePlate}
-                </span>
-              </div>
-            </div>
-
-            <div className="border-t border-white/5 pt-4 text-xs">
-              <span className="text-[9px] uppercase tracking-widest text-luxury-text-secondary block">Service Plan</span>
-              <span className="text-luxury-text-primary block uppercase font-medium">
-                {selectedBooking.service?.title || 'Custom'}
-              </span>
-              {selectedBooking.notes && (
-                <p className="text-[10px] text-luxury-text-secondary/70 mt-1 italic">
-                  Notes: "{selectedBooking.notes}"
-                </p>
-              )}
-            </div>
-
-            <div className="flex justify-between items-center border-t border-white/5 pt-4">
-              <div>
-                <span className="text-[9px] uppercase tracking-widest text-luxury-text-secondary block">Service Invoice</span>
-                <span className="text-base font-bold text-luxury-gold-light">${selectedBooking.totalAmount}</span>
-              </div>
-              <Button variant="solid" size="sm" onClick={() => setSelectedBooking(null)}>
-                Close
-              </Button>
-            </div>
-          </Card>
-        </div>
+        <AdminBookingDetail
+          booking={selectedBooking}
+          onClose={() => setSelectedBooking(null)}
+          onRefresh={loadBookings}
+        />
       )}
     </div>
   );

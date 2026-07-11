@@ -12,50 +12,52 @@ const bookingSchema = new mongoose.Schema(
       ref: 'Service',
       required: [true, 'Service reference is required'],
     },
-    // Car details provided at time of booking
     vehicle: {
-      make: { type: String, required: true, trim: true },
-      model: { type: String, required: true, trim: true },
-      year: {
-        type: Number,
-        required: true,
-        min: [1900, 'Year must be 1900 or later'],
-        max: [new Date().getFullYear() + 1, 'Year cannot be in the future'],
-      },
-      licensePlate: { type: String, trim: true, uppercase: true },
+      make: { type: String, required: true },
+      model: { type: String, required: true },
+      year: { type: Number, required: true },
+      licensePlate: { type: String, required: true },
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'confirmed', 'in-progress', 'ready', 'completed', 'cancelled'],
+      default: 'pending',
     },
     appointmentDate: {
       type: Date,
       required: [true, 'Appointment date is required'],
     },
     appointmentTime: {
-      type: String, // e.g. "10:00 AM"
-      required: [true, 'Appointment time is required'],
-    },
-    status: {
       type: String,
-      enum: ['pending', 'confirmed', 'in-progress', 'completed', 'cancelled'],
-      default: 'pending',
+      required: [true, 'Appointment time slot is required'],
     },
     notes: {
       type: String,
-      maxlength: [300, 'Notes cannot exceed 300 characters'],
-      default: '',
     },
     totalAmount: {
       type: Number,
-      min: [0, 'Amount cannot be negative'],
+      required: true,
     },
+    images: [{
+      filename: String,
+      url: String,
+      uploadedAt: { type: Date, default: Date.now },
+      status: { type: String, default: 'customer_provided' }
+    }],
+    repairProgressImages: [{
+      filename: String,
+      url: String,
+      stage: String,
+      uploadedAt: { type: Date, default: Date.now },
+      uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+    }],
+    repairNotes: {
+      type: String,
+      default: ''
+    }
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
-// Auto-populate customer and service when querying
-bookingSchema.pre(/^find/, function (next) {
-  this.populate('customer', 'name email phone').populate('service', 'name price estimatedDuration');
-  next();
-});
-
 module.exports = mongoose.model('Booking', bookingSchema);
+
