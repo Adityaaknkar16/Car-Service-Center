@@ -38,6 +38,32 @@ const bookingSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    carConditionImage: {
+      filename: String,
+      url: String,
+      uploadedAt: { type: Date, default: Date.now },
+    },
+    repairPhases: [
+      {
+        phaseName: String,
+        description: String,
+        status: {
+          type: String,
+          enum: ['pending', 'in-progress', 'completed'],
+          default: 'pending',
+        },
+        images: [
+          {
+            filename: String,
+            url: String,
+            uploadedAt: { type: Date, default: Date.now },
+            caption: String,
+          },
+        ],
+        startedAt: Date,
+        completedAt: Date,
+      },
+    ],
     images: [{
       filename: String,
       url: String,

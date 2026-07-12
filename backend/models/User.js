@@ -30,6 +30,19 @@ const userSchema = new mongoose.Schema(
       enum: ['admin', 'customer'],
       default: 'customer',
     },
+    passwordChangedAt: {
+      type: Date,
+      default: null,
+    },
+    passwordResetToken: {
+      type: String,
+      default: null,
+      select: false,
+    },
+    passwordResetExpires: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true }
 );
@@ -44,6 +57,30 @@ userSchema.pre('save', async function (next) {
 // Compare password method
 userSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
+};
+
+// Set password reset token
+userSchema.methods.setPasswordResetToken = function (hashedToken, expiresAt) {
+  this.passwordResetToken = hashedToken;
+  this.passwordResetExpires = expiresAt;
+};
+
+// Clear password reset token
+userSchema.methods.clearPasswordResetToken = function () {
+  this.passwordResetToken = null;
+  this.passwordResetExpires = null;
+};
+
+// Check if reset token is valid
+userSchema.methods.isResetTokenValid = function (expires) {
+  return this.passwordResetExpires && this.passwordResetExpires > Date.now();
+};
+
+// Set new password and update passwordChangedAt
+userSchema.methods.setNewPassword = function (newPassword) {
+  this.password = newPassword;
+  this.passwordChangedAt = Date.now();
+  this.clearPasswordResetToken();
 };
 
 module.exports = mongoose.model('User', userSchema);

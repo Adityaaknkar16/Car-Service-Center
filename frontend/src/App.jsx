@@ -17,12 +17,16 @@ import Contact from './pages/Contact';
 import CustomerDashboard from './pages/CustomerDashboard';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
+import UserHistoryPage from './pages/UserHistoryPage';
 
 // Admin Pages
 import AdminDashboard from './pages/AdminDashboard';
 import ManageServices from './pages/ManageServices';
 import ManageAppointments from './pages/ManageAppointments';
 import AdminEnquiries from './pages/AdminEnquiries';
+import AdminUserHistoryPage from './pages/AdminUserHistoryPage';
 
 // Helper component to conditionally render Navbar & Footer only on customer-facing routes
 const CustomerContainer = ({ onBookClick }) => {
@@ -43,13 +47,16 @@ const CustomerContainer = ({ onBookClick }) => {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           
-          {/* Auth */}
+          {/* Auth & Recovery */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
 
           {/* Protected Customer Routes */}
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<CustomerDashboard />} />
+            <Route path="/my-bookings" element={<UserHistoryPage />} />
           </Route>
         </Routes>
       </div>
@@ -87,6 +94,7 @@ function App() {
                     <Route path="/services" element={<ManageServices />} />
                     <Route path="/bookings" element={<ManageAppointments />} />
                     <Route path="/enquiries" element={<AdminEnquiries />} />
+                    <Route path="/user-history" element={<AdminUserHistoryPage />} />
                     <Route path="*" element={<Navigate to="/admin" replace />} />
                   </Routes>
                 </AdminLayout>

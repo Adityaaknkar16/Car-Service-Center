@@ -49,16 +49,55 @@ const Navbar = ({ onBookClick }) => {
             </NavLink>
           ))}
           {user && (
-            <NavLink
-              to={user.role === 'admin' ? '/admin' : '/dashboard'}
-              className={({ isActive }) =>
-                `text-xs uppercase tracking-widest font-semibold transition-colors duration-300 ${
-                  isActive ? 'text-luxury-gold-light' : 'text-luxury-text-secondary hover:text-luxury-text-primary'
-                }`
-              }
-            >
-              {user.role === 'admin' ? 'Admin Panel' : 'My Dashboard'}
-            </NavLink>
+            <>
+              {user.role === 'admin' ? (
+                <>
+                  <NavLink
+                    to="/admin"
+                    className={({ isActive }) =>
+                      `text-xs uppercase tracking-widest font-semibold transition-colors duration-300 ${
+                        isActive ? 'text-luxury-gold-light' : 'text-luxury-text-secondary hover:text-luxury-text-primary'
+                      }`
+                    }
+                  >
+                    Admin Panel
+                  </NavLink>
+                  <NavLink
+                    to="/admin/user-history"
+                    className={({ isActive }) =>
+                      `text-xs uppercase tracking-widest font-semibold transition-colors duration-300 ${
+                        isActive ? 'text-luxury-gold-light' : 'text-luxury-text-secondary hover:text-luxury-text-primary'
+                      }`
+                    }
+                  >
+                    User Booking History
+                  </NavLink>
+                </>
+              ) : (
+                <>
+                  <NavLink
+                    to="/dashboard"
+                    className={({ isActive }) =>
+                      `text-xs uppercase tracking-widest font-semibold transition-colors duration-300 ${
+                        isActive ? 'text-luxury-gold-light' : 'text-luxury-text-secondary hover:text-luxury-text-primary'
+                      }`
+                    }
+                  >
+                    My Dashboard
+                  </NavLink>
+                  <NavLink
+                    to="/my-bookings"
+                    className={({ isActive }) =>
+                      `text-xs uppercase tracking-widest font-semibold transition-colors duration-300 ${
+                        isActive ? 'text-luxury-gold-light' : 'text-luxury-text-secondary hover:text-luxury-text-primary'
+                      }`
+                    }
+                  >
+                    My Bookings
+                  </NavLink>
+                </>
+              )}
+            </>
           )}
         </div>
 
@@ -120,13 +159,43 @@ const Navbar = ({ onBookClick }) => {
             </Link>
           ))}
           {user && (
-            <Link
-              to={user.role === 'admin' ? '/admin' : '/dashboard'}
-              onClick={() => setIsOpen(false)}
-              className="text-xs uppercase tracking-widest font-medium text-luxury-text-secondary hover:text-luxury-text-primary"
-            >
-              {user.role === 'admin' ? 'Admin Panel' : 'My Dashboard'}
-            </Link>
+            <>
+              {user.role === 'admin' ? (
+                <>
+                  <Link
+                    to="/admin"
+                    onClick={() => setIsOpen(false)}
+                    className="text-xs uppercase tracking-widest font-medium text-luxury-text-secondary hover:text-luxury-text-primary"
+                  >
+                    Admin Panel
+                  </Link>
+                  <Link
+                    to="/admin/user-history"
+                    onClick={() => setIsOpen(false)}
+                    className="text-xs uppercase tracking-widest font-medium text-luxury-text-secondary hover:text-luxury-text-primary"
+                  >
+                    User Booking History
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/dashboard"
+                    onClick={() => setIsOpen(false)}
+                    className="text-xs uppercase tracking-widest font-medium text-luxury-text-secondary hover:text-luxury-text-primary"
+                  >
+                    My Dashboard
+                  </Link>
+                  <Link
+                    to="/my-bookings"
+                    onClick={() => setIsOpen(false)}
+                    className="text-xs uppercase tracking-widest font-medium text-luxury-text-secondary hover:text-luxury-text-primary"
+                  >
+                    My Bookings
+                  </Link>
+                </>
+              )}
+            </>
           )}
           <div className="pt-2 flex flex-col space-y-2">
             {user ? (
